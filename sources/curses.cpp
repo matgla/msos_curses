@@ -1,4 +1,4 @@
-// This file is part of MSOS project.
+// This file is part of MSOS Curses project.
 // Copyright (C) 2020 Mateusz Stadnik
 //
 // This program is free software: you can redistribute it and/or modify
@@ -15,9 +15,9 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstddef>
-#include <cstdio>
 #include <unistd.h>
 #include <stdarg.h>
+#include <cstring>
 
 #include "curses.h"
 
@@ -64,7 +64,7 @@ struct Color
 
 constexpr int color_pairs = 16;
 Color colors[color_pairs];
-int index = 0;
+int colors_index = 0;
 
 }
 
@@ -115,6 +115,8 @@ int getmaxy(WINDOW* window)
     return window->max_y;
 }
 
+// PRINTERS //
+
 int printw(const char *str, ...)
 {
     va_list arg;
@@ -140,13 +142,6 @@ int refresh(void)
     return 0;
 }
 
-int getch(void)
-{
-    char buffer;
-    while (!read(STDOUT_FILENO, &buffer, 1));
-    return buffer;
-}
-
 int noecho(void)
 {
     struct termios tattr;
@@ -169,6 +164,16 @@ int echo(void)
     return 0;
 }
 
+// INPUT
+int getch(void)
+{
+    char buffer;
+    while (!read(STDIN_FILENO, &buffer, 1));
+    return buffer;
+}
+
+
+
 
 int attron(int attr)
 {
@@ -176,7 +181,6 @@ int attron(int attr)
     {
         int id = attr & 0xF;
         auto color = colors[id];
-        printf("color index: %d, fg: %d, bg: %d\n", id, color.fg, color.bg);
         switch (color.fg)
         {
             case COLOR_BLACK: printf(color_black); break;
@@ -246,7 +250,7 @@ int keypad(WINDOW* window, bool bf)
     return 0;
 }
 
-int getstr_(char* str, size_t size)
+int getstr_(char* str, int size)
 {
     return fgets(str, size, stdin) == nullptr ? ERR : OK;
 }
@@ -264,16 +268,26 @@ bool has_colors()
 
 int init_pair(short id, short fg, short bg)
 {
-    if (index + 1 < color_pairs)
+    if (colors_index >= color_pairs)
     {
-        colors[index] = {
-            .fg = fg,
-            .bg = bg,
-            .id = id
-        };
-        ++index;
+        return -1;
     }
-    return -1;
+
+    for (int i = 0; i < color_pairs; ++i)
+    {
+        if (colors[i].id == id)
+        {
+            return -1;
+        }
+    }
+
+    colors[colors_index] = {
+        .fg = fg,
+        .bg = bg,
+        .id = id
+    };
+    ++colors_index;
+    return colors_index - 1;
 }
 
 int COLOR_PAIR(int id)

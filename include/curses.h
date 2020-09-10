@@ -1,4 +1,4 @@
-// This file is part of MSOS project.
+// This file is part of MSOS Curses project.
 // Copyright (C) 2020 Mateusz Stadnik
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,11 +19,9 @@
 #if defined(__cplusplus)
 extern "C"
 {
-#else 
+#else
     typedef int bool;
 #endif // __cplusplus
-
-    typedef unsigned int size_t;
 
     struct WINDOW
     {
@@ -32,33 +30,42 @@ extern "C"
         bool key_translation;
     };
 
+    // Initialization
     WINDOW* initscr(void);
     void endwin(void);
+
+    // Parameters
     int getmaxy(WINDOW* window);
     int getmaxx(WINDOW* window);
 
     #define getmaxyx(win,y,x) (y = getmaxy(win), x = getmaxx(win))
 
+    // Output
     int printw(const char *, ...);
     int mvprintw(int row, int colums, const char *, ...);
     int refresh(void);
-    int getch(void);
     int noecho(void);
     int echo(void);
-    int attron(int);
-    int attroff(int);
-    int raw(void);
-    int noraw(void);
     int clear(void);
-    int move(int, int);
-
-    int keypad(WINDOW *, bool);
-    int getstr_(char *, unsigned int);
-
     int start_color(void);
     bool has_colors();
     int init_pair(short, short, short);
     int COLOR_PAIR(int n);
+
+    // Positioning
+    int move(int, int);
+
+    int keypad(WINDOW *, bool);
+    int getstr_(char *, int);
+
+    // Input
+    int getch(void);
+
+    // Settings
+    int attron(int);
+    int attroff(int);
+    int raw(void);
+    int noraw(void);
 
     extern WINDOW* stdscr;
 
