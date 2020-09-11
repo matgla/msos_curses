@@ -130,3 +130,22 @@ void clear_tcsetattr()
         .action = 0
     };
 }
+
+int ioctl(int fd, unsigned long int req, ...)
+{
+    va_list arg;
+    va_start(arg, req);
+    if (fd == STDOUT_FILENO)
+    {
+        if (req == TIOCGWINSZ)
+        {
+            void* a = va_arg(arg, void*);
+            struct winsize* w = static_cast<struct winsize*>(a);
+            w->ws_col = 80;
+            w->ws_row = 24;
+        }
+    }
+    va_end(arg);
+    return 0;
+}
+

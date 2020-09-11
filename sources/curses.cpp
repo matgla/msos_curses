@@ -62,16 +62,86 @@ struct Color
 
 Color colors[COLOR_PAIRS];
 
+chtype buffer[24*80]; // TODO: malloc considered
+
 }
 
+int waddch(WINDOW* win, const chtype ch)
+{
+    if (win == nullptr)
+    {
+        return ERR;
+    }
+
+    int last_char = win->max_x * win->max_y - 1;
+    int requested_char = win->cursor_x + win->max_x * win->cursor_y;
+    // TODO: support for line scrolling
+    if (requested_char > last_char)
+    {
+        return ERR;
+    }
+    if (win->cursor_x < win->max_x - 1)
+    {
+        ++win->cursor_x;
+    }
+    else
+    {
+        ++win->cursor_y;
+        win->cursor_x = 0;
+    }
+    win->screen_buffer[requested_char] = ch;
+
+    return OK;
+}
+
+int mvwaddch(WINDOW* win, int y, int x, const chtype ch)
+{
+    return wmove(win, y, x) == OK? waddch(win, ch) : ERR;
+}
+
+int waddchstr(WINDOW *win, const chtype *chstr)
+{
+    if (win == nullptr)
+    {
+        return ERR;
+    }
+    int size_to_copy = win->max_x - win->cursor_x;
+    int buffer_position = win->cursor_x + win->max_x * win->cursor_y;
+    for (int i = 0; i < size_to_copy; ++i)
+    {
+        if ((chstr[i] & A_CHARTEXT) == 0)
+        {
+            return OK;
+        }
+        win->screen_buffer[buffer_position + i] = chstr[i];
+    }
+    return OK;
+}
+
+// int mvwaddchstr(WINDOW *win, int y, int x, const chtype *chstr)
+// {
+
+// }
 
 
 WINDOW* stdscr = nullptr;
 
+int wmove(WINDOW *win, int y, int x)
+{
+    if (y >= win->max_y || x >= win->max_x)
+    {
+        return ERR;
+    }
+
+    win->cursor_x = static_cast<short>(x);
+    win->cursor_y = static_cast<short>(y);
+
+    return OK;
+}
+
 int move(int y, int x)
 {
-    printf("\033[%d;%dH", x, y);
-    return 0;
+    return wmove(stdscr, y, x);
 }
 
 int clear()
@@ -82,6 +152,8 @@ int clear()
 
 WINDOW* initscr()
 {
+    std::memset(&window, 0, sizeof(window));
+    window.screen_buffer = buffer;
     stdscr = &window;
     clear();
     move(0, 0);
@@ -95,12 +167,13 @@ WINDOW* initscr()
     return &window;
 }
 
-void endwin()
+int endwin()
 {
     echo();
     printf(nobold);
     attroff(COLOR_PAIR(1));
     fflush(stdout);
+    return OK;
 }
 
 int getmaxx(WINDOW* window)
@@ -180,7 +253,7 @@ int wattroff(WINDOW* win, int attrs)
     {
         return ERR;
     }
-    win->attributes &= (~attrs);
+    win->attributes &= static_cast<char>(~attrs);
     return OK;
 }
 
@@ -193,9 +266,9 @@ int wattron(WINDOW* win, int attrs)
 
     if (attrs & A_COLOR_MASK)
     {
-        win->attributes &= (~A_COLOR_MASK);
+        win->attributes &= static_cast<char>(~A_COLOR_MASK);
     }
-    win->attributes |= attrs;
+    win->attributes |= static_cast<char>(attrs);
     return OK;
 }
 
@@ -206,7 +279,7 @@ int wattrset(WINDOW* win, int attrs)
         return ERR;
     }
 
-    win->attributes = attrs;
+    win->attributes = static_cast<char>(attrs);
     return OK;
 }
 
@@ -223,8 +296,8 @@ int wcolor_set(WINDOW* win, short color_pair_number, void* opts)
         return ERR;
     }
 
-    win->attributes &= ~(A_COLOR_MASK);
-    win->attributes |= (color_pair_number << A_COLOR_OFFSET);
+    win->attributes &= static_cast<char>(~A_COLOR_MASK);
+    win->attributes |= static_cast<char>((color_pair_number << A_COLOR_OFFSET));
     return OK;
 }
 

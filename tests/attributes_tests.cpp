@@ -60,32 +60,32 @@ MSTEST_F(AttributesShould, SetupOnlyTargetedAttribute)
 
     attron(0x2);
     wattron(&custom_window, 0x4);
-    mstest::expect_eq(custom_window.attributes, 0xF4);
-    mstest::expect_eq(stdscr->attributes, 0xA2);
+    mstest::expect_eq(custom_window.attributes, static_cast<char>(0xF4));
+    mstest::expect_eq(stdscr->attributes, static_cast<char>(0xA2));
 
     attron(0x2);
     wattron(&custom_window, 0x4);
-    mstest::expect_eq(custom_window.attributes, 0xF4);
-    mstest::expect_eq(stdscr->attributes, 0xA2);
+    mstest::expect_eq(custom_window.attributes, static_cast<char>(0xF4));
+    mstest::expect_eq(stdscr->attributes, static_cast<char>(0xA2));
 }
 
 MSTEST_F(AttributesShould, TurnOffOnlyTargetedAttribute)
 {
     WINDOW custom_window;
-    wattrset(&custom_window, 0xFFFFFFFF);
-    attrset(0xFFFFFFFF);
+    wattrset(&custom_window, 0xFF);
+    attrset(0xFF);
 
-    attroff(0xF0F);
+    attroff(0xF0);
     wattroff(&custom_window, 0xFF);
-    mstest::expect_eq(custom_window.attributes, static_cast<int>(0xFFFFFF00));
-    mstest::expect_eq(stdscr->attributes, static_cast<int>(0xFFFFF0F0));
+    mstest::expect_eq(custom_window.attributes, static_cast<int>(0x00));
+    mstest::expect_eq(stdscr->attributes, static_cast<int>(0x0F));
 }
 
 MSTEST_F(AttributesShould, SetupColorCorrectly)
 {
     WINDOW custom_window;
-    wattrset(&custom_window, 0xFFFF2222);
-    attrset(0xFFFF2222);
+    wattrset(&custom_window, 0x0A);
+    attrset(0x2B);
 
     init_pair(1, COLOR_RED, COLOR_BLACK);
     init_pair(2, COLOR_RED, COLOR_BLACK);
@@ -94,13 +94,13 @@ MSTEST_F(AttributesShould, SetupColorCorrectly)
     attron(COLOR_PAIR(1));
     wattron(&custom_window, COLOR_PAIR(1));
 
-    mstest::expect_eq(custom_window.attributes, static_cast<int>(0x00012222));
-    mstest::expect_eq(stdscr->attributes, static_cast<int>(0x00012222));
+    mstest::expect_eq(custom_window.attributes, static_cast<int>(0x1A));
+    mstest::expect_eq(stdscr->attributes, static_cast<int>(0x1B));
 
     color_set(2, NULL);
     wcolor_set(&custom_window, 3, NULL);
-    mstest::expect_eq(custom_window.attributes, static_cast<int>(0x00032222));
-    mstest::expect_eq(stdscr->attributes, static_cast<int>(0x00022222));
+    mstest::expect_eq(custom_window.attributes, static_cast<int>(0x3A));
+    mstest::expect_eq(stdscr->attributes, static_cast<int>(0X2B));
 }
 
 MSTEST_F(AttributesShould, SetStandout)
