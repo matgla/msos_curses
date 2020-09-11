@@ -19,6 +19,8 @@ project (msos_curses C CXX)
 
 cmake_minimum_required(VERSION 3.2)
 
+set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include(FetchContent)
 
 FetchContent_Declare(

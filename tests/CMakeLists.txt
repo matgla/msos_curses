@@ -23,6 +23,8 @@ find_package(mstest REQUIRED)
 target_sources(msos_curses_tests
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/attributes_tests.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/color_tests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/output_tests.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/input_tests.cpp
 )
@@ -41,4 +43,9 @@ target_link_libraries(msos_curses_tests
         mstest
         msos_curses
         stubs
+)
+
+add_custom_target(run_tests
+    COMMAND msos_curses_tests
+    DEPENDS msos_curses_tests
 )

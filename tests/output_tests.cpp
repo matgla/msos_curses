@@ -101,25 +101,3 @@ MSTEST_F(OutputShould, Clear)
     auto last_call = printf_history().back();
     mstest::expect_eq(last_call.str(), "\033[H\033[J", &string_as_number);
 }
-
-MSTEST_F(OutputShould, InitColorPair)
-{
-    mstest::expect_eq(0, init_pair(1, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(1, init_pair(10, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(-1, init_pair(10, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(2, init_pair(100, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(3, init_pair(2, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(4, init_pair(3, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(5, init_pair(4, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(6, init_pair(5, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(7, init_pair(6, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(8, init_pair(7, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(9, init_pair(8, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(10, init_pair(9, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(11, init_pair(15, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(12, init_pair(11, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(13, init_pair(18, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(14, init_pair(120, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(15, init_pair(30, COLOR_BLACK, COLOR_RED));
-    mstest::expect_eq(-1, init_pair(1, COLOR_BLACK, COLOR_RED));
-}

@@ -41,8 +41,8 @@ constexpr const char* nounderline = "\033[24m";
 constexpr const char* color_black = "\033[1;30m";
 constexpr const char* color_red = "\033[1;31m";
 constexpr const char* color_reset = "\033[0m";
-constexpr const char* bgcolor_red = "\033[1;41m";
 constexpr const char* bgcolor_black = "\033[1;40m";
+constexpr const char* bgcolor_red = "\033[1;41m";
 constexpr const char* bgcolor_reset = "\033[0m";
 
     // Background Black: \u001b[40m
@@ -54,19 +54,17 @@ constexpr const char* bgcolor_reset = "\033[0m";
     // Background Cyan: \u001b[46m
     // Background White: \u001b[47m
 
-
 struct Color
 {
     short fg;
     short bg;
-    short id;
 };
 
-constexpr int color_pairs = 16;
-Color colors[color_pairs];
-int colors_index = 0;
+Color colors[COLOR_PAIRS];
 
 }
+
+
 
 WINDOW* stdscr = nullptr;
 
@@ -101,7 +99,7 @@ void endwin()
 {
     echo();
     printf(nobold);
-    attroff(A_COLOR);
+    attroff(COLOR_PAIR(1));
     fflush(stdout);
 }
 
@@ -172,66 +170,62 @@ int getch(void)
     return buffer;
 }
 
+//-------------------------------------------//
+//------         ATTRIBUTES           -------//
+//-------------------------------------------//
 
-
-
-int attron(int attr)
+int wattroff(WINDOW* win, int attrs)
 {
-    if (attr & A_COLOR)
+    if (win == nullptr)
     {
-        int id = attr & 0xF;
-        auto color = colors[id];
-        switch (color.fg)
-        {
-            case COLOR_BLACK: printf(color_black); break;
-            case COLOR_RED: printf(color_red); break;
-        }
-
-        switch (color.bg)
-        {
-            case COLOR_BLACK: printf(bgcolor_black); break;
-            case COLOR_RED: printf(bgcolor_red); break;
-        }
-
-        return 0;
+        return ERR;
     }
-    if (attr & A_BOLD)
-    {
-        printf(bold);
-    }
-    if (attr & A_UNDERLINE)
-    {
-        printf(underline);
-    }
-    if (attr & A_REVERSE)
-    {
-        printf(reverse);
-    }
-    return 0;
+    win->attributes &= (~attrs);
+    return OK;
 }
 
-int attroff(int attr)
+int wattron(WINDOW* win, int attrs)
 {
-    if (attr & A_COLOR)
+    if (win == nullptr)
     {
-        printf(color_reset);
-        printf(bgcolor_reset);
-        return 0;
+        return ERR;
     }
 
-    if (attr & A_BOLD)
+    if (attrs & A_COLOR_MASK)
     {
-        printf(nobold);
+        win->attributes &= (~A_COLOR_MASK);
     }
-    if (attr & A_UNDERLINE)
+    win->attributes |= attrs;
+    return OK;
+}
+
+int wattrset(WINDOW* win, int attrs)
+{
+    if (win == nullptr)
     {
-        printf(nounderline);
+        return ERR;
     }
-    if (attr & A_REVERSE)
+
+    win->attributes = attrs;
+    return OK;
+}
+
+int wcolor_set(WINDOW* win, short color_pair_number, void* opts)
+{
+    static_cast<void>(opts);
+    if (win == nullptr)
     {
-        printf(noreverse);
+        return ERR;
     }
-    return 0;
+
+    if (color_pair_number < 1 || color_pair_number > COLOR_PAIRS - 1)
+    {
+        return ERR;
+    }
+
+    win->attributes &= ~(A_COLOR_MASK);
+    win->attributes |= (color_pair_number << A_COLOR_OFFSET);
+    return OK;
 }
 
 int raw()
@@ -255,49 +249,60 @@ int getstr_(char* str, int size)
     return fgets(str, size, stdin) == nullptr ? ERR : OK;
 }
 
+//-------------------------------------------//
+//------           COLORS             -------//
+//-------------------------------------------//
+
 int start_color(void)
 {
+    // TODO: initialize default
     return 0;
+}
+
+int init_pair(short id, short fg, short bg)
+{
+    if (id < 1 || id > COLOR_PAIRS - 1)
+    {
+        return ERR;
+    }
+
+    colors[id] = {
+        .fg = fg,
+        .bg = bg
+    };
+    return OK;
 }
 
 bool has_colors()
 {
+    // TODO: terminal type detector
     return TRUE;
 }
 
-
-int init_pair(short id, short fg, short bg)
+int init_color(short color, short r, short g, short b)
 {
-    if (colors_index >= color_pairs)
-    {
-        return -1;
-    }
-
-    for (int i = 0; i < color_pairs; ++i)
-    {
-        if (colors[i].id == id)
-        {
-            return -1;
-        }
-    }
-
-    colors[colors_index] = {
-        .fg = fg,
-        .bg = bg,
-        .id = id
-    };
-    ++colors_index;
-    return colors_index - 1;
+    static_cast<void>(color);
+    static_cast<void>(r);
+    static_cast<void>(g);
+    static_cast<void>(b);
+    // TODO: color manipulation implementation
+    return ERR;
 }
 
-int COLOR_PAIR(int id)
+bool can_change_color(void)
 {
-    for (int i = 0; i < color_pairs; ++i)
+    // TODO: terminal type detector, color support
+    return FALSE;
+}
+
+int pair_content(short pair, short* foreground, short* background)
+{
+    if (pair < 1 || pair > COLOR_PAIRS - 1)
     {
-        if (colors[i].id == id)
-        {
-            return A_COLOR | i;
-        }
+        return ERR;
     }
-    return -1;
+
+    *foreground = colors[pair].fg;
+    *background = colors[pair].bg;
+    return OK;
 }
