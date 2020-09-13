@@ -187,11 +187,8 @@ int border_set(
     // https://invisible-island.net/ncurses/man/curs_inopts.3x.html
         int cbreak(void);
        int nocbreak(void);
-       int echo(void);
-       int noecho(void);
        int halfdelay(int tenths);
        int intrflush(WINDOW *win, bool bf);
-       int keypad(WINDOW *win, bool bf);
        int meta(WINDOW *win, bool bf);
        int nodelay(WINDOW *win, bool bf);
        int raw(void);
@@ -206,7 +203,6 @@ int border_set(
     //https://invisible-island.net/ncurses/man/curs_clear.3x.html
        int erase(void);
        int werase(WINDOW *win);
-       int clear(void);
        int wclear(WINDOW *win);
        int clrtobot(void);
        int wclrtobot(WINDOW *win);
@@ -308,7 +304,6 @@ int border_set(
 
        // https://invisible-island.net/ncurses/man/curs_initscr.3x.html
 
-       WINDOW *initscr(void);
        int endwin(void);
        bool isendwin(void);
     //    SCREEN *newterm(const char *type, FILE *outfd, FILE *infd);
@@ -336,7 +331,6 @@ int border_set(
        void wsyncdown(WINDOW *win);
 
        // https://invisible-island.net/ncurses/man/curs_refresh.3x.html
-        int refresh(void);
        int wrefresh(WINDOW *win);
        int wnoutrefresh(WINDOW *win);
        int doupdate(void);
@@ -354,7 +348,6 @@ int border_set(
      #define getmaxyx(win,y,x) (y = getmaxy(win), x = getmaxx(win))
 
     // https://invisible-island.net/ncurses/man/curs_getch.3x.html
-       int getch(void);
        int wgetch(WINDOW *win);
        int mvgetch(int y, int x);
        int mvwgetch(WINDOW *win, int y, int x);
@@ -485,7 +478,6 @@ int inchstr(chtype *chstr);
        int tgetnum(const char *id);
        char *tgetstr(const char *id, char **area);
        char *tgoto(const char *cap, int col, int row);
-       int tputs(const char *str, int affcnt, int (*putc)(int));
 
     // Positioning
 
@@ -498,8 +490,6 @@ int inchstr(chtype *chstr);
     // Settings
     #define getstr(str) getstr_(str, sizeof(str));
 
-    int raw(void);
-    int noraw(void);
 
     //-------------------------------------------//
     //------         ATTRIBUTES           -------//
